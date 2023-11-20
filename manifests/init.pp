@@ -1,5 +1,5 @@
 # @summary Setup dedicated motd to setup motd.
-# This module will be used from all other m3connect modules to announce the used modules into motd
+# This module can be used in all other modules to announce the module usage in motd
 #
 # @param motd_mailcontact
 #   Specify the email address as contact in motd
