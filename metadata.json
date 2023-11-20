@@ -4,9 +4,9 @@
   "author": "Toto",
   "summary": "This module setup motd",
   "license": "MIT",
-  "source": "https://github.com/Toutzn/puppet-twit_motd.git",
-  "project_page": "https://github.com/Toutzn/puppet-twit_motd",
-  "issues_url": "https://github.com/Toutzn/puppet-twit_motd/issues",
+  "source": "https://github.com/Toutzn/puppet-motd.git",
+  "project_page": "https://github.com/Toutzn/puppet-motd",
+  "issues_url": "https://github.com/Toutzn/puppet-motd/issues",
   "tags": [
     "motd"
   ],
