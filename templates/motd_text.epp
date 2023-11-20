@@ -1,0 +1,17 @@
+<%- |
+    Stdlib::Email $mail_contact
+| -%>
+<%- if $facts['os']['family'] == 'FreeBSD' { -%>
+<%- if versioncmp($facts['os']['release']['major'], '13') < 0 { -%>
+<%= $facts['os']['family'] %> <%= $facts['os']['release']['full'] %>
+<%- } -%>
+<%- } -%>
+
+==============================[ NOTICE ]==============================
+
+    This system is monitored by puppet.
+    Local changes could be lost!
+    If you have any questions, please contact <%= $mail_contact %>
+
+======================================================================
+
