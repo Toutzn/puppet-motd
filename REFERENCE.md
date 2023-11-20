@@ -24,7 +24,7 @@
 
 ### <a name="twit_motd"></a>`twit_motd`
 
-This module will be used from all other m3connect modules to announce the used modules into motd
+This module can be use in all other modules to announce the module usage in motd
 
 #### Parameters
 
