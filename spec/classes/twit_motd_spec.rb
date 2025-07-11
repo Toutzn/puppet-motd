@@ -19,79 +19,52 @@ describe 'twit_motd' do
         case os_facts.dig(:os, 'release', 'major')
         when '12'
           it { is_expected.to contain_concat('/etc/motd').with_group('wheel').with_owner('root').with_mode('0644') }
-          it do
-            is_expected.to contain_concat__fragment('motd_registered_modules').with(
-              'target'  => '/etc/motd',
-              'content' => "    Registered puppet modules:\n",
-              'order'   => '09',
-            )
-          end
-          it do
-            is_expected.to contain_concat__fragment('motd_footer').with(
-              'target'  => '/etc/motd',
-              'order'   => '15',
-            )
-          end
-          it do
-            is_expected.to contain_concat__fragment('motd_fragment_twit_motd').with(
-              'target'  => '/etc/motd',
-              'order'   => '10',
-              'content' => "      -- twit_motd\n",
-            )
-          end
         when '13', '14'
           it { is_expected.to contain_concat('/etc/motd.template').with_group('wheel').with_owner('root').with_mode('0644') }
           it { is_expected.to contain_class('Twit_motd::Notify') }
           it do
             is_expected.to contain_exec('motd_reload').with(
               'refreshonly' => 'true',
-              'path'        => ['/usr/bin','/usr/sbin','/bin','/sbin','/usr/local/bin','/usr/local/sbin'],
+              'path'        => ['/usr/bin', '/usr/sbin', '/bin', '/sbin', '/usr/local/bin', '/usr/local/sbin'],
               'command'     => 'service motd onerestart',
-            )
-          end
-          it do
-            is_expected.to contain_concat__fragment('motd_registered_modules').with(
-              'target'  => '/etc/motd.template',
-              'content' => "    Registered puppet modules:\n",
-              'order'   => '09',
-            )
-          end
-          it do
-            is_expected.to contain_concat__fragment('motd_footer').with(
-              'target'  => '/etc/motd.template',
-              'order'   => '15',
-            )
-          end
-          it do
-            is_expected.to contain_concat__fragment('motd_fragment_twit_motd').with(
-              'target'  => '/etc/motd.template',
-              'order'   => '10',
-              'content' => "      -- twit_motd\n",
             )
           end
         end
       when 'Debian'
         it { is_expected.to contain_concat('/etc/motd').with_group('root').with_owner('root').with_mode('0644') }
-        it do
-          is_expected.to contain_concat__fragment('motd_registered_modules').with(
-            'target'  => '/etc/motd',
-            'content' => "    Registered puppet modules:\n",
-            'order'   => '09',
-          )
-        end
-        it do
-          is_expected.to contain_concat__fragment('motd_footer').with(
-            'target'  => '/etc/motd',
-            'order'   => '15',
-          )
-        end
-        it do
-          is_expected.to contain_concat__fragment('motd_fragment_twit_motd').with(
-            'target'  => '/etc/motd',
-            'order'   => '10',
-            'content' => "      -- twit_motd\n",
-          )
-        end
+      end
+
+      motd_file_path = case os_facts[:osfamily]
+                       when 'FreeBSD'
+                         case os_facts.dig(:os, 'release', 'major')
+                         when '12'
+                           '/etc/motd'
+                         when '13', '14'
+                           '/etc/motd.template'
+                         end
+                       when 'Debian'
+                         '/etc/motd'
+                       end
+
+      it do
+        is_expected.to contain_concat__fragment('motd_registered_modules').with(
+          'target'  => motd_file_path,
+          'content' => "    Registered puppet modules:\n",
+          'order'   => '09',
+        )
+      end
+      it do
+        is_expected.to contain_concat__fragment('motd_footer').with(
+          'target'  => motd_file_path,
+          'order'   => '15',
+        )
+      end
+      it do
+        is_expected.to contain_concat__fragment('motd_fragment_twit_motd').with(
+          'target'  => motd_file_path,
+          'order'   => '10',
+          'content' => "      -- twit_motd\n",
+        )
       end
 
       context 'when email is used' do
