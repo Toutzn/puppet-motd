@@ -2,11 +2,13 @@
 
 ### Table of Contents
 
-1. [Module Description](#description)
-2. [Usage](#usage)
-3. [Reference](#reference)
-4. [Supported OS](#os-support)
-5. [Requirements](#requirements)
+- [twit\_motd](#twit_motd)
+    - [Table of Contents](#table-of-contents)
+  - [Module Description](#module-description)
+  - [Usage](#usage)
+  - [Reference](#reference)
+  - [OS-Support](#os-support)
+  - [Requirements](#requirements)
 
 ## Module Description
 
@@ -63,17 +65,16 @@ See [REFERENCE.md](REFERENCE.md).
 This module is supported on the following operating systems:
 
 * Debian
-	* 9
 	* 10
 	* 11
 	* 12
 * Ubuntu
-	* 18.04
 	* 20.04
 	* 22.04
 * FreeBSD
 	* 12
 	* 13
+	* 14
 
 ## Requirements
 

@@ -1,23 +1,20 @@
 {
   "name": "toto-twit_motd",
-  "version": "1.1.1",
+  "version": "2.0.0",
   "author": "Toto",
   "summary": "This module setup motd",
   "license": "MIT",
   "source": "https://github.com/Toutzn/puppet-motd.git",
   "project_page": "https://github.com/Toutzn/puppet-motd",
   "issues_url": "https://github.com/Toutzn/puppet-motd/issues",
-  "tags": [
-    "motd"
-  ],
   "dependencies": [
     {
       "name": "puppetlabs/stdlib",
-      "version_requirement": ">= 8.1.0 < 9.4.1"
+      "version_requirement": ">= 8.1.0 < 9.7.0"
     },
     {
       "name": "puppetlabs/concat",
-      "version_requirement": ">= 7.1.1 < 9.0.0"
+      "version_requirement": ">= 7.1.1 < 9.1.0"
     }
   ],
   "operatingsystem_support": [
@@ -52,7 +49,10 @@
       "version_requirement": ">= 7.0.0 < 9.0.0"
     }
   ],
-  "pdk-version": "3.0.0",
-  "template-url": "pdk-default#3.0.0",
-  "template-ref": "tags/3.0.0-0-g056e50d"
+  "tags": [
+    "motd"
+  ],
+  "pdk-version": "3.4.0",
+  "template-url": "pdk-default#3.4.0",
+  "template-ref": "tags/3.4.0-0-gd3cc13f"
 }
