@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 Each new release typically also includes the latest modulesync defaults.
 These should not affect the functionality of the module.
 
+## [v2.0.0](https://github.com/Toutzn/puppet-motd/tree/v2.0.0) (2025-07-11)
+
+[Full Changelog](https://github.com/Toutzn/puppet-motd/compare/v1.1.1...v2.0.0)
+
 ## [v1.1.1](https://github.com/Toutzn/puppet-motd/tree/v1.1.1) (2023-11-20)
 
 [Full Changelog](https://github.com/Toutzn/puppet-motd/compare/v1.1.0...v1.1.1)
