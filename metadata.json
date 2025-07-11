@@ -24,7 +24,6 @@
     {
       "operatingsystem": "Debian",
       "operatingsystemrelease": [
-        "9",
         "10",
         "11",
         "12"
@@ -33,16 +32,17 @@
     {
       "operatingsystem": "Ubuntu",
       "operatingsystemrelease": [
-        "18.04",
         "20.04",
-        "22.04"
+        "22.04",
+        "24.04"
       ]
     },
     {
       "operatingsystem": "FreeBSD",
       "operatingsystemrelease": [
         "12",
-        "13"
+        "13",
+        "14"
       ]
     }
   ],
