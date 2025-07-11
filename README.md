@@ -65,14 +65,11 @@ See [REFERENCE.md](REFERENCE.md).
 This module is supported on the following operating systems:
 
 * Debian
-	* 10
-	* 11
 	* 12
 * Ubuntu
-	* 20.04
 	* 22.04
+	* 24.04
 * FreeBSD
-	* 12
 	* 13
 	* 14
 
