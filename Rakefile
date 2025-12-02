@@ -2,51 +2,54 @@
 
 require 'json'
 
-# === Tests, Lint, Syntax etc. (voxpupuli-test) ===
+# === Tests, Lint, Syntax etc. (voxpupuli-test) ==========================
 begin
   require 'voxpupuli/test/rake'
 rescue LoadError
   # nur in Test-Umgebung relevant
 end
 
-# === Acceptance / Beaker (voxpupuli-acceptance) ===
+# === Acceptance / Beaker (voxpupuli-acceptance) =========================
 begin
   require 'voxpupuli/acceptance/rake'
 rescue LoadError
   # nur relevant, wenn :system_tests installiert sind
 end
 
-# --- GitHub Repo für Changelog / Release fest verdrahten ---
-ENV['CHANGELOG_GITHUB_USER']    ||= 'Toutzn'
-ENV['CHANGELOG_GITHUB_PROJECT'] ||= 'puppet-motd'
-
-# === Release-Tasks (voxpupuli-release) ===
+# === Release-Tasks (voxpupuli-release) ==================================
 begin
   require 'voxpupuli/release/rake_tasks'
 rescue LoadError
   # nur relevant, wenn :release installiert ist
 end
 
-# === REFERENCE.md generieren ===
+# === REFERENCE.md generieren ============================================
 desc 'Generate REFERENCE.md'
 task :reference, %i[debug backtrace] do |_t, args|
   patterns = ''
   Rake::Task['strings:generate:reference'].invoke(patterns, args[:debug], args[:backtrace])
 end
 
-# === Eigener CHANGELOG-Task mit korrektem GitHub-Repo ===
+# === Optional: Changelog-Task (manuell nutzbar) =========================
+# Nutzt github_changelog_generator, aber wir fassen release:prepare NICHT an.
 begin
   require 'github_changelog_generator/task'
 
   GitHubChangelogGenerator::RakeTask.new :changelog do |config|
-    # Version aus metadata.json lesen
-    metadata = JSON.parse(File.read('metadata.json'))
-    version  = metadata['version']
-    config.future_release = "v#{version}"
+    # Repo explizit setzen
     config.user    = 'Toutzn'
     config.project = 'puppet-motd'
 
+    # Token aus ENV, falls gesetzt
     config.token = ENV['CHANGELOG_GITHUB_TOKEN']
+
+    # Version aus metadata.json lesen, z.B. 4.0.1
+    metadata = JSON.parse(File.read('metadata.json'))
+    version  = metadata['version']
+
+    # Optional: future_release setzen (wenn du ihn doch nutzen willst)
+    # Achtung: deine Tags heißen v4.0.0 usw.
+    config.future_release = "v#{version}"
 
     config.header = <<~HEADER
       # Changelog
@@ -67,41 +70,6 @@ begin
     ]
   end
 
-  # Workaround für CRLF unter Linux: an bestehenden :changelog-Task anhängen
-  require 'rbconfig'
-  if RbConfig::CONFIG['host_os'] =~ /linux/
-    Rake::Task['changelog'].enhance do
-      puts 'Fixing line endings in CHANGELOG.md...'
-      changelog_file = File.join(__dir__, 'CHANGELOG.md')
-      next unless File.exist?(changelog_file)
-
-      changelog_txt = File.read(changelog_file)
-      new_contents  = changelog_txt.gsub(%r{\r\n}, "\n")
-      File.open(changelog_file, 'w') { |file| file.puts new_contents }
-    end
-  end
 rescue LoadError
-  # github_changelog_generator nicht installiert
-end
-
-# === Override: release:porcelain:changelog soll unseren :changelog benutzen ===
-begin
-  # voxpupuli-release definiert den Task – wir leeren ihn und definieren neu
-  Rake::Task['release:porcelain:changelog'].clear
-rescue NameError
-  # Task war noch nicht definiert – dann definieren wir ihn einfach
-end
-
-namespace :release do
-  namespace :porcelain do
-    desc 'Generate changelog for this module using github_changelog_generator'
-    task :changelog do
-      # sicherheitshalber Version aus metadata.json in FUTURE_RELEASE setzen
-      metadata = JSON.parse(File.read('metadata.json'))
-      ENV['FUTURE_RELEASE'] ||= metadata['version']
-
-      # unseren eigenen :changelog-Task aufrufen
-      Rake::Task['changelog'].invoke
-    end
-  end
+  # github_changelog_generator nicht installiert → kein :changelog-Task
 end
