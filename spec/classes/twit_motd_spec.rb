@@ -7,7 +7,6 @@ describe 'twit_motd' do
     context "on #{os}" do
       let(:facts) { os_facts }
 
-      # Familien- und Release-Infos robust aus os_facts holen (Strings/Symbole)
       family = os_facts.dig(:os, :family) ||
                os_facts.dig(:os, 'family') ||
                os_facts[:osfamily] ||
@@ -16,7 +15,6 @@ describe 'twit_motd' do
       release_major = os_facts.dig(:os, :release, :major) ||
                       os_facts.dig(:os, 'release', 'major')
 
-      # motd_file_path abhängig vom OS festlegen
       let(:motd_file_path) do
         case family
         when 'FreeBSD'
