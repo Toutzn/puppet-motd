@@ -7,6 +7,7 @@ group :test do
   gem 'puppet', ENV.fetch('PUPPET_GEM_VERSION', '>= 0'), require: false
   gem 'puppet_metadata', '~> 5.3',  require: false
   gem 'voxpupuli-test', '~> 13.2', require: false
+  gem 'rubocop-performance', '< 1.25', require: false
 end
 
 group :system_tests do
