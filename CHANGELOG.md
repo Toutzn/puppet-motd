@@ -5,6 +5,14 @@ Each new release typically also includes the latest modulesync defaults.
 These should not affect the functionality of the module.
 
 
+## [v4.0.1](https://github.com/Toutzn/puppet-motd/tree/v4.0.1) (2025-12-02)
+
+[Full Changelog](https://github.com/Toutzn/puppet-motd/compare/v4.0.0...v4.0.1)
+
+**Merged pull requests:**
+
+- update readme [\#1](https://github.com/Toutzn/puppet-motd/pull/1) ([Toutzn](https://github.com/Toutzn))
+
 ## [v4.0.0](https://github.com/Toutzn/puppet-motd/tree/v4.0.0) (2025-12-02)
 
 [Full Changelog](https://github.com/Toutzn/puppet-motd/compare/v3.0.0...v4.0.0)
