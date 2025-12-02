@@ -7,19 +7,12 @@ describe 'twit_motd' do
     context "on #{os}" do
       let(:facts) { os_facts }
 
-      let(:family)        { facts[:os]['family'] }
-      let(:release_major) { facts[:os]['release']['major'] }
-
-      let(:motd_file_path) do
-        case family
-        when 'FreeBSD'
-          case release_major
-          when '12'
-            '/etc/motd'
-          when '13', '14'
-            '/etc/motd.template'
-          end
-        when 'Debian'
+      # Pfad zur MOTD-Datei nur vom OS-Namen abhängig
+      let(:motd_path) do
+        case os
+        when %r{\Afreebsd-(13|14)}
+          '/etc/motd.template'
+        else
           '/etc/motd'
         end
       end
@@ -31,30 +24,57 @@ describe 'twit_motd' do
       it { is_expected.to contain_concat__fragment('motd_registered_modules') }
       it { is_expected.to contain_twit_motd__register('twit_motd') }
 
-      case os_facts[:osfamily]
-      when 'FreeBSD'
-        case release_major
-        when '12'
-          it { is_expected.to contain_concat('/etc/motd').with_group('wheel').with_owner('root').with_mode('0644') }
-        when '13', '14'
-          it { is_expected.to contain_concat('/etc/motd.template').with_group('wheel').with_owner('root').with_mode('0644') }
-          it { is_expected.to contain_class('Twit_motd::Notify') }
+      # Concat-Ressource selbst soll existieren
+      it { is_expected.to contain_concat(motd_path) }
 
-          it do
-            is_expected.to contain_exec('motd_reload').with(
-              'refreshonly' => 'true',
-              'path'        => ['/usr/bin', '/usr/sbin', '/bin', '/sbin', '/usr/local/bin', '/usr/local/sbin'],
-              'command'     => 'service motd onerestart',
-            )
-          end
+      # OS-spezifische Checks
+      case os
+      when %r{\Afreebsd-12}
+        it do
+          is_expected.to contain_concat('/etc/motd')
+            .with_group('wheel')
+            .with_owner('root')
+            .with_mode('0644')
         end
-      when 'Debian'
-        it { is_expected.to contain_concat('/etc/motd').with_group('root').with_owner('root').with_mode('0644') }
+      when %r{\Afreebsd-(13|14)}
+        it do
+          is_expected.to contain_concat('/etc/motd.template')
+            .with_group('wheel')
+            .with_owner('root')
+            .with_mode('0644')
+        end
+
+        it { is_expected.to contain_class('Twit_motd::Notify') }
+
+        it do
+          is_expected.to contain_exec('motd_reload').with(
+            'refreshonly' => 'true',
+            'path'        => ['/usr/bin', '/usr/sbin', '/bin', '/sbin',
+                              '/usr/local/bin', '/usr/local/sbin'],
+            'command'     => 'service motd onerestart',
+          )
+        end
+      when %r{\Adebian-}
+        it do
+          is_expected.to contain_concat('/etc/motd')
+            .with_group('root')
+            .with_owner('root')
+            .with_mode('0644')
+        end
+      when %r{\Aubuntu-}
+        # Ubuntu hängt am Debian-OS-Familie; Pfad und Rechte wie Debian
+        it do
+          is_expected.to contain_concat('/etc/motd')
+            .with_group('root')
+            .with_owner('root')
+            .with_mode('0644')
+        end
       end
 
+      # Fragmente mit OS-abhängigem target
       it do
         is_expected.to contain_concat__fragment('motd_registered_modules').with(
-          'target'  => motd_file_path,
+          'target'  => motd_path,
           'content' => "    Registered puppet modules:\n",
           'order'   => '09',
         )
@@ -62,14 +82,14 @@ describe 'twit_motd' do
 
       it do
         is_expected.to contain_concat__fragment('motd_footer').with(
-          'target' => motd_file_path,
+          'target' => motd_path,
           'order'  => '15',
         )
       end
 
       it do
         is_expected.to contain_concat__fragment('motd_fragment_twit_motd').with(
-          'target'  => motd_file_path,
+          'target'  => motd_path,
           'order'   => '10',
           'content' => "      -- twit_motd\n",
         )
