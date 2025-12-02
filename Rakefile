@@ -42,15 +42,10 @@ begin
     # Version aus metadata.json lesen
     metadata = JSON.parse(File.read('metadata.json'))
     version  = metadata['version']
-
-    # future_release auf aktuelle Version setzen (ohne führendes "v")
-    config.future_release = version
-
-    # Dein tatsächliches GitHub-Repo
+    config.future_release = "v#{version}"
     config.user    = 'Toutzn'
     config.project = 'puppet-motd'
 
-    # Token aus ENV (hast du schon exportiert)
     config.token = ENV['CHANGELOG_GITHUB_TOKEN']
 
     config.header = <<~HEADER
