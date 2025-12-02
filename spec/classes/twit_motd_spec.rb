@@ -7,13 +7,8 @@ describe 'twit_motd' do
     context "on #{os}" do
       let(:facts) { os_facts }
 
-      family = os_facts.dig(:os, :family) ||
-               os_facts.dig(:os, 'family') ||
-               os_facts[:osfamily] ||
-               os_facts['osfamily']
-
-      release_major = os_facts.dig(:os, :release, :major) ||
-                      os_facts.dig(:os, 'release', 'major')
+      let(:family)        { facts[:os]['family'] }
+      let(:release_major) { facts[:os]['release']['major'] }
 
       let(:motd_file_path) do
         case family
@@ -36,24 +31,13 @@ describe 'twit_motd' do
       it { is_expected.to contain_concat__fragment('motd_registered_modules') }
       it { is_expected.to contain_twit_motd__register('twit_motd') }
 
-      case family
+      case os_facts[:osfamily]
       when 'FreeBSD'
         case release_major
         when '12'
-          it do
-            is_expected.to contain_concat('/etc/motd')
-              .with_group('wheel')
-              .with_owner('root')
-              .with_mode('0644')
-          end
+          it { is_expected.to contain_concat('/etc/motd').with_group('wheel').with_owner('root').with_mode('0644') }
         when '13', '14'
-          it do
-            is_expected.to contain_concat('/etc/motd.template')
-              .with_group('wheel')
-              .with_owner('root')
-              .with_mode('0644')
-          end
-
+          it { is_expected.to contain_concat('/etc/motd.template').with_group('wheel').with_owner('root').with_mode('0644') }
           it { is_expected.to contain_class('Twit_motd::Notify') }
 
           it do
@@ -65,12 +49,7 @@ describe 'twit_motd' do
           end
         end
       when 'Debian'
-        it do
-          is_expected.to contain_concat('/etc/motd')
-            .with_group('root')
-            .with_owner('root')
-            .with_mode('0644')
-        end
+        it { is_expected.to contain_concat('/etc/motd').with_group('root').with_owner('root').with_mode('0644') }
       end
 
       it do
@@ -97,21 +76,13 @@ describe 'twit_motd' do
       end
 
       context 'when email is used' do
-        let(:params) do
-          {
-            'motd_mailcontact' => 'fobar@mail.local',
-          }
-        end
+        let(:params) { { 'motd_mailcontact' => 'fobar@mail.local' } }
 
         it { is_expected.to compile.with_all_deps }
       end
 
       context 'when motd is used' do
-        let(:params) do
-          {
-            'motd_motd' => 'foobar',
-          }
-        end
+        let(:params) { { 'motd_motd' => 'foobar' } }
 
         it { is_expected.to compile.with_all_deps }
       end
