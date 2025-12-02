@@ -43,7 +43,7 @@ Also you can add text into the $motd_motd variable to add a custom message as we
     Local changes could be lost!
     If you have any questions, please contact your@e-mail.ltd
 
-======================================================================
+==========================[ CUSTOM MESSAGE ]==========================
 
 Custom Message
 
