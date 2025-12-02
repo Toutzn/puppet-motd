@@ -66,6 +66,7 @@ This module is supported on the following operating systems:
 
 * Debian
 	* 12
+	* 13
 * Ubuntu
 	* 22.04
 	* 24.04

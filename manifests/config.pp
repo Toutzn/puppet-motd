@@ -7,8 +7,6 @@
 class twit_motd::config {
   assert_private()
 
-  include twit_motd::notify
-
   $_motd_contact           = $twit_motd::motd_mailcontact
 
   $_motd_file              = $twit_motd::params::motd_file

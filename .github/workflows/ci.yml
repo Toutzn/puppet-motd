@@ -12,11 +12,13 @@ concurrency:
 
 jobs:
   puppet:
+    # Läuft nur auf GitHub (nicht unter act)
     if: ${{ !github.event.act }}
     name: Puppet (GitHub Actions)
     uses: voxpupuli/gha-puppet/.github/workflows/beaker.yml@v4
 
   puppet-act:
+    # Läuft nur lokal mit act
     if: ${{ github.event.act }}
     name: Puppet (local via act)
     runs-on: ubuntu-22.04
@@ -27,6 +29,8 @@ jobs:
 
     env:
       PUPPET_VERSION: ${{ matrix.puppet_version }}
+      # Wichtig: Fixtures-Downloads nur mit einem Thread, sonst Race im Cache
+      MAX_FIXTURE_THREAD_COUNT: 1
 
     steps:
       - name: Checkout repository
@@ -39,6 +43,7 @@ jobs:
             git add .
           fi
 
+      # Ruby automatisch passend setzen
       - name: Select Ruby version for Puppet
         id: ruby
         run: |
@@ -57,6 +62,8 @@ jobs:
       - name: Install dependencies
         run: |
           bundle config set --local path 'vendor/bundle'
+          # system_tests / release / development nicht installieren,
+          # damit Acceptance-/Release-Gems unter Ruby 2.7 nicht nerven
           bundle config set --local without 'system_tests release development'
           bundle install --with test
 
@@ -64,3 +71,14 @@ jobs:
         run: |
           echo "Running tests for Puppet $PUPPET_VERSION (Ruby ${{ steps.ruby.outputs.ruby_version }})"
           bundle exec rake validate lint spec
+
+      # Cleanup-Job: läuft IMMER, auch wenn Tests fehlschlagen
+      - name: Cleanup Docker containers created by act
+        if: always()
+        run: |
+          if command -v docker >/dev/null 2>&1; then
+            echo "Cleaning up Docker containers with names starting with 'act-'..."
+            docker ps -a --filter "name=act-" --format "{{.ID}}" | xargs -r docker rm -f || true
+          else
+            echo "Docker CLI not found; skipping cleanup."
+          fi

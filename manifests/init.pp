@@ -11,6 +11,7 @@ class twit_motd (
   Stdlib::Email       $motd_mailcontact = 'your@e-mail.ltd',
   Optional[String[1]] $motd_motd        = undef,
 ) {
+  include twit_motd::notify
   contain twit_motd::params
   contain twit_motd::config
 
