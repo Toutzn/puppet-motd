@@ -1,56 +1,38 @@
 # frozen_string_literal: true
 
-RSpec.configure do |c|
-  c.mock_with :rspec
-end
+# Coverage aktivieren, wenn es ein lib/-Verzeichnis gibt
+ENV['COVERAGE'] ||= 'yes' if Dir.exist?(File.expand_path('../lib', __dir__))
 
-require 'puppetlabs_spec_helper/module_spec_helper'
+require 'voxpupuli/test/spec_helper'
 require 'rspec-puppet-facts'
+require 'yaml'
 
-require 'spec_helper_local' if File.file?(File.join(File.dirname(__FILE__), 'spec_helper_local.rb'))
+# Optionales lokales Helper-File
+require 'spec_helper_local' if File.file?(File.join(__dir__, 'spec_helper_local.rb'))
 
 include RspecPuppetFacts
 
-default_facts = {
-  puppetversion: Puppet.version,
-  facterversion: Facter.version,
-}
-
-default_fact_files = [
-  File.expand_path(File.join(File.dirname(__FILE__), 'default_facts.yml')),
-  File.expand_path(File.join(File.dirname(__FILE__), 'default_module_facts.yml')),
-]
-
-default_fact_files.each do |f|
-  next unless File.exist?(f) && File.readable?(f) && File.size?(f)
-
-  begin
-    require 'deep_merge'
-    default_facts.deep_merge!(YAML.safe_load(File.read(f), permitted_classes: [], permitted_symbols: [], aliases: true))
-  rescue StandardError => e
-    RSpec.configuration.reporter.message "WARNING: Unable to load #{f}: #{e}"
-  end
-end
-
-# read default_facts and merge them over what is provided by facterdb
-default_facts.each do |fact, value|
-  add_custom_fact fact, value, merge_facts: true
-end
-
 RSpec.configure do |c|
-  c.default_facts = default_facts
+  c.mock_with :rspec
+
+  # Moderne Einstellung für facterdb: keine String-Keys erzwingen
+  c.facterdb_string_keys = false if c.respond_to?(:facterdb_string_keys=)
+
   c.before :each do
-    # set to strictest setting for testing
-    # by default Puppet runs at warning level
+    # strengere Puppet-Einstellungen für Tests
     Puppet.settings[:strict] = :warning
     Puppet.settings[:strict_variables] = true
   end
+
+  # Bolt-Tests nur, wenn explizit angefordert
   c.filter_run_excluding(bolt: true) unless ENV['GEM_BOLT']
+
   c.after(:suite) do
+    # 100% Ressourcen-Coverage anstreben
     RSpec::Puppet::Coverage.report!(100)
   end
 
-  # Filter backtrace noise
+  # Backtrace etwas aufräumen
   backtrace_exclusion_patterns = [
     %r{spec_helper},
     %r{gems},
@@ -60,6 +42,28 @@ RSpec.configure do |c|
     c.backtrace_exclusion_patterns = backtrace_exclusion_patterns
   elsif c.respond_to?(:backtrace_clean_patterns)
     c.backtrace_clean_patterns = backtrace_exclusion_patterns
+  end
+end
+
+# Basis-Facts aus facterdb hinzufügen (kommt aus voxpupuli-test / rspec-puppet-facts)
+add_mocked_facts!
+
+# Optional: zusätzliche Modul-Facts aus default_module_facts.yml
+default_module_facts_file = File.expand_path(File.join(__dir__, 'default_module_facts.yml'))
+if File.exist?(default_module_facts_file) && File.readable?(default_module_facts_file) && File.size?(default_module_facts_file)
+  begin
+    module_facts = YAML.safe_load(
+      File.read(default_module_facts_file),
+      permitted_classes: [],
+      permitted_symbols: [],
+      aliases: true,
+    )
+
+    module_facts&.each do |fact, value|
+      add_custom_fact fact.to_sym, value, merge_facts: true
+    end
+  rescue StandardError => e
+    RSpec.configuration.reporter.message "WARNING: Unable to load #{default_module_facts_file}: #{e}"
   end
 end
 

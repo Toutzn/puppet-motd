@@ -3,6 +3,7 @@
 #
 # @param motd_mailcontact
 #   Specify the email address as contact in motd
+#
 # @param motd_motd
 #   A string of a custom motd message
 #

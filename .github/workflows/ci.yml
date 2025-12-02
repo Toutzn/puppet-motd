@@ -1,5 +1,3 @@
----
-
 name: CI
 
 on:
@@ -14,5 +12,55 @@ concurrency:
 
 jobs:
   puppet:
-    name: Puppet
-    uses: voxpupuli/gha-puppet/.github/workflows/beaker.yml@v1
+    if: ${{ !github.event.act }}
+    name: Puppet (GitHub Actions)
+    uses: voxpupuli/gha-puppet/.github/workflows/beaker.yml@v4
+
+  puppet-act:
+    if: ${{ github.event.act }}
+    name: Puppet (local via act)
+    runs-on: ubuntu-22.04
+
+    strategy:
+      matrix:
+        puppet_version: [7, 8]
+
+    env:
+      PUPPET_VERSION: ${{ matrix.puppet_version }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Ensure Git repo exists (rake needs git)
+        run: |
+          if [ ! -d .git ]; then
+            git init
+            git add .
+          fi
+
+      - name: Select Ruby version for Puppet
+        id: ruby
+        run: |
+          if [ "$PUPPET_VERSION" = "7" ]; then
+            echo "ruby_version=2.7" >> $GITHUB_OUTPUT
+          else
+            echo "ruby_version=3.2" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Setup Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: ${{ steps.ruby.outputs.ruby_version }}
+          bundler-cache: true
+
+      - name: Install dependencies
+        run: |
+          bundle config set --local path 'vendor/bundle'
+          bundle config set --local without 'system_tests release development'
+          bundle install --with test
+
+      - name: Run Puppet checks
+        run: |
+          echo "Running tests for Puppet $PUPPET_VERSION (Ruby ${{ steps.ruby.outputs.ruby_version }})"
+          bundle exec rake validate lint spec

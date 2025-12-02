@@ -1,28 +1,30 @@
 source 'https://rubygems.org'
 
-# The development group is intended for developer tooling. CI will never install this.
 group :development do
 end
 
-# The test group is used for static validations and unit tests in gha-puppet's
-# basic and beaker gha-puppet workflows.
 group :test do
-  gem 'rubocop-performance', '~> 1.19', require: false
-  # Require the latest Puppet by default unless a specific version was requested
-  # CI will typically set it to '~> 7.0' to get 7.x
   gem 'puppet', ENV.fetch('PUPPET_GEM_VERSION', '>= 0'), require: false
-  # Needed to build the test matrix based on metadata
-  gem 'puppet_metadata', '~> 3.5',  require: false
-  # metagem that pulls in all further requirements
-  gem 'voxpupuli-test', '~> 7.0', require: false
+  gem 'puppet_metadata', '~> 5.3',  require: false
+  gem 'voxpupuli-test', '~> 13.2', require: false
 end
 
-# The system_tests group is used in gha-puppet's beaker workflow.
 group :system_tests do
-  gem 'voxpupuli-acceptance', '~> 2.4', require: false
+  if Gem::Version.new(RUBY_VERSION) >= Gem::Version.new('3.2')
+    # GitHub CI, Ruby >= 3.2 → moderne Version
+    gem 'voxpupuli-acceptance', '~> 4.2', require: false
+  else
+    # act / Ruby 2.7 → letzte Version, die 2.7 unterstützt
+    gem 'voxpupuli-acceptance', '~> 3.8', require: false
+  end
 end
 
-# The release group is used in gha-puppet's release workflow
 group :release do
-  gem 'voxpupuli-release', '~> 3.0', '>= 3.0.1'
+  if Gem::Version.new(RUBY_VERSION) >= Gem::Version.new('3.2')
+    # Neue Release-Tools, nur Ruby >= 3.2
+    gem 'voxpupuli-release', '~> 5.0', '>= 5.0', require: false
+  else
+    # Ältere Release-Tools, die noch Ruby 2.7 können
+    gem 'voxpupuli-release', '~> 3.2', '>= 3.2.3', require: false
+  end
 end
