@@ -54,15 +54,7 @@ describe 'twit_motd' do
             'command'     => 'service motd onerestart',
           )
         end
-      when %r{\Adebian-}
-        it do
-          is_expected.to contain_concat('/etc/motd')
-            .with_group('root')
-            .with_owner('root')
-            .with_mode('0644')
-        end
-      when %r{\Aubuntu-}
-        # Ubuntu hängt am Debian-OS-Familie; Pfad und Rechte wie Debian
+      when %r{\A(debian|ubuntu)-}
         it do
           is_expected.to contain_concat('/etc/motd')
             .with_group('root')
