@@ -2,6 +2,25 @@
 
 require 'spec_helper_acceptance'
 
+# Hilfsfunktion, um den MOTD-Pfad je nach OS zu bestimmen
+def motd_path
+  case fact('osfamily')
+  when 'FreeBSD'
+    case fact('operatingsystemmajrelease')
+    when '12'
+      '/etc/motd'
+    else
+      # 13, 14, ...
+      '/etc/motd.template'
+    end
+  when 'Debian'
+    # gilt für Debian und Ubuntu
+    '/etc/motd'
+  else
+    '/etc/motd'
+  end
+end
+
 describe 'twit_motd class' do
   context 'with default parameters' do
     let(:pp) do
@@ -15,39 +34,18 @@ describe 'twit_motd class' do
       apply_manifest(pp, catch_changes: true)
     end
 
-    describe 'motd file' do
-      motd_path =
-        case fact('osfamily')
-        when 'FreeBSD'
-          case fact('operatingsystemmajrelease')
-          when '12'
-            '/etc/motd'
-          else
-            '/etc/motd.template'
-          end
-        when 'Debian'
-          '/etc/motd'
-        else
-          '/etc/motd'
-        end
+    it 'creates motd file with correct mode and content' do
+      f = file(motd_path)
 
-      describe file(motd_path) do
-        it { is_expected.to be_file }
-        it { is_expected.to be_readable.by('others') }
-        it { is_expected.to be_owned_by 'root' }
+      expect(f).to be_file
+      expect(f).to be_readable.by('others')
+      expect(f).to be_owned_by 'root'
 
-        its(:mode) do
-          is_expected.to match(%r{\A0?644\z})
-        end
+      # Modus 0644 – kann als "644" oder "0644" zurückkommen
+      expect(f.mode).to match(%r{\A0?644\z})
 
-        its(:content) do
-          is_expected.to match(%r{Registered puppet modules})
-        end
-
-        its(:content) do
-          is_expected.to match(%r{-- twit_motd})
-        end
-      end
+      expect(f.content).to match(%r{Registered puppet modules})
+      expect(f.content).to match(%r{-- twit_motd})
     end
   end
 
@@ -80,27 +78,9 @@ describe 'twit_motd class' do
       apply_manifest(pp, catch_changes: true)
     end
 
-    describe 'motd content with custom motd' do
-      motd_path =
-        case fact('osfamily')
-        when 'FreeBSD'
-          case fact('operatingsystemmajrelease')
-          when '12'
-            '/etc/motd'
-          else
-            '/etc/motd.template'
-          end
-        when 'Debian'
-          '/etc/motd'
-        else
-          '/etc/motd'
-        end
-
-      describe file(motd_path) do
-        its(:content) do
-          is_expected.to match(%r{foobar})
-        end
-      end
+    it 'renders the custom motd in the motd file' do
+      f = file(motd_path)
+      expect(f.content).to match(%r{foobar})
     end
   end
 end
